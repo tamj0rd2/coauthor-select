@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -19,7 +21,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	coAuthors := []git.CoAuthor{{Name: "tamj0rd2", Email: "tam@tam.com"}}
+	coAuthors, err := getCoAuthors()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	output := git.PrepareCommitMessage(string(file), coAuthors)
 
@@ -29,4 +34,53 @@ func main() {
 	}
 
 	fmt.Println("Added co-authors:", coAuthors)
+}
+
+func getCoAuthors() ([]git.CoAuthor, error) {
+	authorsFile, err := os.ReadFile("authors.json") // TODO: make filepath configurable
+	if err != nil {
+		return nil, err
+	}
+
+	var authors Authors
+	err = json.NewDecoder(bytes.NewReader(authorsFile)).Decode(&authors)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: be able to load the pairs from somewhere other than a file. i.e discord
+	pairFile, err := os.ReadFile("pair.json")
+	if err != nil {
+		return nil, err
+	}
+
+	var pairs []string
+	err = json.NewDecoder(bytes.NewReader(pairFile)).Decode(&pairs)
+	if err != nil {
+		return nil, err
+	}
+
+	var coAuthors []git.CoAuthor
+	for _, name := range pairs {
+		author, err := authors.Get(name)
+		if err != nil {
+			return nil, err
+		}
+
+		coAuthors = append(coAuthors, author)
+	}
+
+	return coAuthors, nil
+}
+
+type Authors []git.CoAuthor
+
+func (authors Authors) Get(name string) (git.CoAuthor, error) {
+	for _, author := range authors {
+		if author.Name == name {
+			return author, nil
+		}
+	}
+
+	return git.CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
 }

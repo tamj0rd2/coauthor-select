@@ -7,15 +7,6 @@ import (
 
 const COMMIT_SEPARATOR = "\n# ------------------------ >8 ------------------------"
 
-type CoAuthor struct {
-	Name  string
-	Email string
-}
-
-func (c CoAuthor) String() string {
-	return fmt.Sprintf("%s <%s>", c.Name, c.Email)
-}
-
 func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	if len(coAuthors) == 0 {
 		return input
