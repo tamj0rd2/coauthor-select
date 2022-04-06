@@ -1,4 +1,4 @@
-package lib
+package git
 
 import (
 	"fmt"
@@ -22,8 +22,8 @@ func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	}
 
 	sections := strings.SplitN(input, COMMIT_SEPARATOR, 2)
-
 	message := sections[0] + "\n"
+
 	for _, coAuthor := range coAuthors {
 		message += fmt.Sprintf("\nCo-authored-by: %s", coAuthor.String())
 	}
