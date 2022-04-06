@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/tamj0rd2/coauthor-select/git"
+	"github.com/tamj0rd2/coauthor-select/domain"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	output := git.PrepareCommitMessage(string(file), coAuthors)
+	output := domain.PrepareCommitMessage(string(file), coAuthors)
 
 	err = os.WriteFile(commitFilePath, []byte(output), 0644)
 	if err != nil {
@@ -36,7 +36,7 @@ func main() {
 	fmt.Println("Added co-authors:", coAuthors)
 }
 
-func getCoAuthors() ([]git.CoAuthor, error) {
+func getCoAuthors() ([]domain.CoAuthor, error) {
 	authorsFile, err := os.ReadFile("authors.json") // TODO: make filepath configurable
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func getCoAuthors() ([]git.CoAuthor, error) {
 		return nil, err
 	}
 
-	var coAuthors []git.CoAuthor
+	var coAuthors []domain.CoAuthor
 	for _, name := range pairs {
 		author, err := authors.Get(name)
 		if err != nil {
@@ -73,14 +73,14 @@ func getCoAuthors() ([]git.CoAuthor, error) {
 	return coAuthors, nil
 }
 
-type Authors []git.CoAuthor
+type Authors []domain.CoAuthor
 
-func (authors Authors) Get(name string) (git.CoAuthor, error) {
+func (authors Authors) Get(name string) (domain.CoAuthor, error) {
 	for _, author := range authors {
 		if author.Name == name {
 			return author, nil
 		}
 	}
 
-	return git.CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
+	return domain.CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
 }
