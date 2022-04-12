@@ -1,1 +1,1 @@
-go run main.go
+coauthor-select --commitFile=$1
