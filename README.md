@@ -2,12 +2,14 @@
 
 ## Usage
 
-1. Run `make setup`
-2. Update authors.json to contain the names and email addresses of the people you commonly work with
-3. Create a `pairs.json` file in the repo root with the names of the people you want to pair with. e.g `["Tamara"]`. This defines the people in your current pairing session
-4. Commit. You'll be able to see the co-authors in the commit message
+1. Install this package, somehow
+2. Create a .hooks folder
+3. Run `git config core.hooksPath .hooks`
+4. In your project repo root, run `echo 'go run main.go' > .hooks/prepare-commit-msg && chmod +x ./hooks/prepare-commit-msg`
+5. Add an authors.json to contain the names and email addresses of the people you commonly work with
+6. Create a `pairs.json` file which you will need to maintain with the names of the people in your current pairing session
+7. Commit. You'll be able to see the co-authors in the commit message
 
 ## Contributing
 
 - Run the tests using `make test`
-- To test the main cmd yourself, run `make setup && go run main.go`
