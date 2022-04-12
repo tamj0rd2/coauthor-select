@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -10,18 +11,28 @@ import (
 	"github.com/tamj0rd2/coauthor-select/lib"
 )
 
-func main() {
-	if len(os.Args) != 2 {
-		log.Fatal("Usage:\ncoauthor-apply <messageFilePath>")
-	}
+var (
+	authorsFilePath string
+	commitFilePath  string
+	pairsFilePath   string
+)
 
-	commitFilePath := os.Args[1]
+func init() {
+	flag.StringVar(&authorsFilePath, "authorsFile", "authors.json", "names & emails of teammates")
+	flag.StringVar(&commitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
+	flag.StringVar(&pairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
+}
+
+func main() {
+	flag.Parse()
+	log.SetFlags(log.Lshortfile)
+
 	file, err := os.ReadFile(commitFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	coAuthors, err := getCoAuthors()
+	coAuthors, err := getCoAuthors(authorsFilePath, pairsFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,8 +47,8 @@ func main() {
 	fmt.Println("Added co-authors:", coAuthors)
 }
 
-func getCoAuthors() ([]lib.CoAuthor, error) {
-	authorsFile, err := os.ReadFile("authors.json") // TODO: make filepath configurable
+func getCoAuthors(authorsFilePath string, pairsFilePath string) ([]lib.CoAuthor, error) {
+	authorsFile, err := os.ReadFile(authorsFilePath) // TODO: make filepath configurable
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +60,7 @@ func getCoAuthors() ([]lib.CoAuthor, error) {
 	}
 
 	// TODO: be able to load the pairs from somewhere other than a file. i.e discord
-	pairFile, err := os.ReadFile("pair.json")
+	pairFile, err := os.ReadFile(pairsFilePath)
 	if err != nil {
 		return nil, err
 	}
