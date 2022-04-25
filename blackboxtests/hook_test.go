@@ -9,19 +9,22 @@ import (
 	"testing"
 )
 
-func TestHook(t *testing.T) {
+var (
+	tam = lib.CoAuthor{Name: "Tam", Email: "t@am.com"}
+)
+
+func TestHookWhenSomeoneIsPairing(t *testing.T) {
 	var (
 		commitFilePath = "test_commit_file"
 		commitMessage  = "feat-376 Did some work"
 
-		authors = []lib.CoAuthor{{
-			Name:  "Tam",
-			Email: "tam@tam.com",
-		}}
+		authors         = []lib.CoAuthor{tam}
 		authorsFilePath = "test_authors.json"
 
-		pairs         = []string{"Tam"}
+		pairs         = []string{tam.Name}
 		pairsFilePath = "test_pairs.json"
+
+		expectedNewCoAuthors = []lib.CoAuthor{tam}
 	)
 	givenThereIsACommitMessageFile(t, commitFilePath, commitMessage)
 	givenThereIsAnAuthorsFile(t, authorsFilePath, authors)
@@ -36,7 +39,37 @@ func TestHook(t *testing.T) {
 	t.Log("CLI output:\n", string(output))
 	assert.NoError(t, err)
 
-	expectedMessage := lib.PrepareCommitMessage(commitMessage, authors)
+	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedNewCoAuthors)
+	assertCommitMessageFileHasContents(t, commitFilePath, expectedMessage)
+}
+
+func TestHookWhenSomeoneIsWorkingAlone(t *testing.T) {
+	var (
+		commitFilePath = "test_commit_file"
+		commitMessage  = "feat-376 Did some work"
+
+		authors         = []lib.CoAuthor{tam}
+		authorsFilePath = "test_authors.json"
+
+		pairs         = []string{}
+		pairsFilePath = "test_pairs.json"
+
+		expectedNewCoAuthors = []lib.CoAuthor{}
+	)
+	givenThereIsACommitMessageFile(t, commitFilePath, commitMessage)
+	givenThereIsAnAuthorsFile(t, authorsFilePath, authors)
+	givenThereIsAPairsFile(t, pairsFilePath, pairs)
+
+	output, err := exec.Command(
+		"go", "run", "../main.go",
+		"--commitFile", commitFilePath,
+		"--authorsFile", authorsFilePath,
+		"--pairsFile", pairsFilePath,
+	).CombinedOutput()
+	t.Log("CLI output:\n", string(output))
+	assert.NoError(t, err)
+
+	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedNewCoAuthors)
 	assertCommitMessageFileHasContents(t, commitFilePath, expectedMessage)
 }
 

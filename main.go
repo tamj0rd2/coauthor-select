@@ -37,10 +37,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	output := lib.PrepareCommitMessage(string(file), coAuthors)
+	if len(coAuthors) == 0 {
+		return
+	}
 
-	err = os.WriteFile(commitFilePath, []byte(output), 0644)
-	if err != nil {
+	updatedCommitMessage := lib.PrepareCommitMessage(string(file), coAuthors)
+	if err = os.WriteFile(commitFilePath, []byte(updatedCommitMessage), 0644); err != nil {
 		log.Fatal(err)
 	}
 
