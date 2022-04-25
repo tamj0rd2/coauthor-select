@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -16,7 +15,7 @@ func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	message := sections[0] + "\n"
 
 	for _, coAuthor := range coAuthors {
-		message += fmt.Sprintf("\nCo-authored-by: %s", coAuthor.String())
+		message += "\n" + coAuthor.String()
 	}
 
 	if len(sections) > 1 {

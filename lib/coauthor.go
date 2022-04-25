@@ -8,7 +8,7 @@ type CoAuthor struct {
 }
 
 func (c CoAuthor) String() string {
-	return fmt.Sprintf("%s <%s>", c.Name, c.Email)
+	return fmt.Sprintf("Co-authored-by: %s <%s>", c.Name, c.Email)
 }
 
 type CoAuthors []CoAuthor

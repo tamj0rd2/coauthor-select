@@ -1,33 +1,34 @@
 package lib_test
 
 import (
+	"fmt"
+	"github.com/alecthomas/assert/v2"
 	"testing"
 
 	"github.com/tamj0rd2/coauthor-select/lib"
 )
 
+var (
+	tam  = lib.CoAuthor{Name: "tam", Email: "t@am.com"}
+	john = lib.CoAuthor{Name: "John Doe", Email: "john@doe.com"}
+)
+
 func TestAddingCoAuthorsToPlainMessage(t *testing.T) {
-	inputMessage := "Hello world :D"
-	coAuthors := []lib.CoAuthor{{Name: "tam", Email: "t@am.com"}, {Name: "tam2", Email: "t@am2.com"}}
+	commitMessage := "Hello world :D"
+	coAuthors := []lib.CoAuthor{tam, john}
 
-	expectedMessage := "Hello world :D\n\nCo-authored-by: tam <t@am.com>\nCo-authored-by: tam2 <t@am2.com>"
+	expectedMessage := fmt.Sprintf("Hello world :D\n\n%s\n%s", tam, john)
 
-	actualMessage := lib.PrepareCommitMessage(inputMessage, coAuthors)
-
-	if actualMessage != expectedMessage {
-		t.Fatalf("\nEXPECTED:\n%v\n\nGOT:\n%v", expectedMessage, actualMessage)
-	}
+	preparedMessage := lib.PrepareCommitMessage(commitMessage, coAuthors)
+	assert.Equal(t, expectedMessage, preparedMessage)
 }
 
 func TestAddingCoAuthorsToTemplatedMessage(t *testing.T) {
 	inputMessage := "Hello world :D" + lib.COMMIT_SEPARATOR + "\nother stuff"
-	coAuthors := []lib.CoAuthor{{Name: "tam", Email: "t@am.com"}}
+	coAuthors := []lib.CoAuthor{tam, john}
 
-	expectedMessage := "Hello world :D\n\nCo-authored-by: tam <t@am.com>" + lib.COMMIT_SEPARATOR + "\nother stuff"
+	expectedMessage := fmt.Sprintf("Hello world :D\n\n%s\n%s%s\nother stuff", tam, john, lib.COMMIT_SEPARATOR)
 
 	actualMessage := lib.PrepareCommitMessage(inputMessage, coAuthors)
-
-	if actualMessage != expectedMessage {
-		t.Fatalf("\nEXPECTED:\n%v\n\nGOT:\n%v", expectedMessage, actualMessage)
-	}
+	assert.Equal(t, expectedMessage, actualMessage)
 }
