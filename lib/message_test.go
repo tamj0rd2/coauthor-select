@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	tam  = lib.CoAuthor{Name: "tam", Email: "t@am.com"}
-	john = lib.CoAuthor{Name: "John Doe", Email: "john@doe.com"}
+	tam    = lib.CoAuthor{Name: "tam", Email: "t@am.com"}
+	john   = lib.CoAuthor{Name: "John Doe", Email: "john@doe.com"}
+	rizzle = lib.CoAuthor{Name: "rizzle", Email: "rizzle@kicks.co"}
 )
 
 func TestAddingCoAuthorsToPlainMessage(t *testing.T) {
@@ -18,6 +19,16 @@ func TestAddingCoAuthorsToPlainMessage(t *testing.T) {
 	coAuthors := []lib.CoAuthor{tam, john}
 
 	expectedMessage := fmt.Sprintf("Hello world :D\n\n%s\n%s", tam, john)
+
+	preparedMessage := lib.PrepareCommitMessage(commitMessage, coAuthors)
+	assert.Equal(t, expectedMessage, preparedMessage)
+}
+
+func TestDoesNotAddCoauthorThatAlreadyExists(t *testing.T) {
+	commitMessage := "Hello world :D\n\n" + john.String()
+	coAuthors := []lib.CoAuthor{tam, john, rizzle}
+
+	expectedMessage := fmt.Sprintf("%s\n\n%s\n%s", commitMessage, tam, rizzle)
 
 	preparedMessage := lib.PrepareCommitMessage(commitMessage, coAuthors)
 	assert.Equal(t, expectedMessage, preparedMessage)

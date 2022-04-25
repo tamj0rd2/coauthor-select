@@ -15,7 +15,10 @@ func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	message := sections[0] + "\n"
 
 	for _, coAuthor := range coAuthors {
-		message += "\n" + coAuthor.String()
+		coauthorLine := coAuthor.String()
+		if !strings.Contains(message, coauthorLine) {
+			message += "\n" + coAuthor.String()
+		}
 	}
 
 	if len(sections) > 1 {
