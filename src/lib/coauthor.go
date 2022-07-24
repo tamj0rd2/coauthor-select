@@ -22,3 +22,7 @@ func (authors CoAuthors) Get(name string) (CoAuthor, error) {
 
 	return CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
 }
+
+func (authors CoAuthors) Any() bool {
+	return len(authors) > 0
+}

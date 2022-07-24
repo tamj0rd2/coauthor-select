@@ -3,7 +3,7 @@ package blackboxtests
 import (
 	"encoding/json"
 	"github.com/alecthomas/assert/v2"
-	"github.com/tamj0rd2/coauthor-select/lib"
+	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"os"
 	"os/exec"
 	"testing"
@@ -13,7 +13,7 @@ var (
 	tam = lib.CoAuthor{Name: "Tam", Email: "t@am.com"}
 )
 
-func TestHookWhenSomeoneIsPairing(t *testing.T) {
+func TestHookWhenSomeoneIsPairingOnTheTrunk(t *testing.T) {
 	var (
 		commitFilePath = "test_commit_file"
 		commitMessage  = "feat-376 Did some work"
@@ -35,6 +35,8 @@ func TestHookWhenSomeoneIsPairing(t *testing.T) {
 		"--commitFile", commitFilePath,
 		"--authorsFile", authorsFilePath,
 		"--pairsFile", pairsFilePath,
+		"--branchName", "main",
+		"--trunkName", "main",
 	).CombinedOutput()
 	t.Log("CLI output:\n", string(output))
 	assert.NoError(t, err)
@@ -43,7 +45,36 @@ func TestHookWhenSomeoneIsPairing(t *testing.T) {
 	assertCommitMessageFileHasContents(t, commitFilePath, expectedMessage)
 }
 
-func TestHookWhenSomeoneIsWorkingAlone(t *testing.T) {
+func TestHookWhenSomeoneIsWorkingAloneOnTheTrunk(t *testing.T) {
+	var (
+		commitFilePath = "test_commit_file"
+		commitMessage  = "feat-376 Did some work"
+
+		authors         = []lib.CoAuthor{tam}
+		authorsFilePath = "test_authors.json"
+
+		pairs         = []string{}
+		pairsFilePath = "test_pairs.json"
+	)
+	givenThereIsACommitMessageFile(t, commitFilePath, commitMessage)
+	givenThereIsAnAuthorsFile(t, authorsFilePath, authors)
+	givenThereIsAPairsFile(t, pairsFilePath, pairs)
+
+	output, err := exec.Command(
+		"go", "run", "../main.go",
+		"--commitFile", commitFilePath,
+		"--authorsFile", authorsFilePath,
+		"--pairsFile", pairsFilePath,
+		"--branchName", "main",
+		"--trunkName", "main",
+	).CombinedOutput()
+
+	t.Log("CLI output:\n", string(output))
+	assert.Error(t, err)
+	assert.Contains(t, string(output), "can't commit to main without a pair")
+}
+
+func TestHookWhenSomeoneIsWorkingAloneOnABranch(t *testing.T) {
 	var (
 		commitFilePath = "test_commit_file"
 		commitMessage  = "feat-376 Did some work"
@@ -65,6 +96,8 @@ func TestHookWhenSomeoneIsWorkingAlone(t *testing.T) {
 		"--commitFile", commitFilePath,
 		"--authorsFile", authorsFilePath,
 		"--pairsFile", pairsFilePath,
+		"--branchName", "not-trunk",
+		"--trunkName", "main",
 	).CombinedOutput()
 	t.Log("CLI output:\n", string(output))
 	assert.NoError(t, err)
