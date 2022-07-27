@@ -130,6 +130,10 @@ func getPreviousPairs() ([]string, bool, error) {
 		return nil, false, fmt.Errorf("failed to decode pairs file %q - %w", options.PairsFilePath, err)
 	}
 
+	if len(pairs) == 0 {
+		return nil, false, nil
+	}
+
 	yesOrNo := []string{"Yes", "No"}
 	prompt := promptui.Select{
 		Label:             fmt.Sprintf("Are you still working with these exact people? [%s]", strings.Join(pairs, ", ")),

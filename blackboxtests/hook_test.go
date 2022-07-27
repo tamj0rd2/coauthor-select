@@ -77,6 +77,28 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithDifferentPeopleThanLastTime(t *
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
+func TestHookWhenSomeoneIs_PairingOnTheTrunk_AndWasWorkingAloneLastTime(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	var (
+		commitMessage = "feat-376 Did some work"
+		authors       = lib.CoAuthors{tam, pete}
+		previousPairs = lib.CoAuthors{}
+		expectedPairs = lib.CoAuthors{tam}
+		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+	)
+	givenThereIsACommitMessageFile(t, commitMessage)
+	givenThereIsAnAuthorsFile(t, authors)
+	givenThereIsAPairsFile(t, previousPairs.Names())
+
+	_, err := runHook(t, options, []string{"Tam", "No one else"})
+	assert.NoError(t, err)
+
+	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
+	assertCommitMessageFileHasContents(t, expectedMessage)
+	assertPairsFileHasEqualPairs(t, expectedPairs)
+}
+
 func TestHookWhenSomeoneIs_WorkingAlone_OnTheTrunk_AndBranchProtectionIsEnabled(t *testing.T) {
 	t.Cleanup(cleanup)
 
