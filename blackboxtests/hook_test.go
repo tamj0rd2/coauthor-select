@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithANewPair(t *testing.T) {
+func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithASinglePerson(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
@@ -25,8 +25,30 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithANewPair(t *testing.T) {
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
+	givenThereIsNotAPairsFile()
 
 	_, err := runHook(t, options, []string{"Tam", "No one else"})
+	assert.NoError(t, err)
+
+	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
+	assertCommitMessageFileHasContents(t, expectedMessage)
+	assertPairsFileHasEqualPairs(t, expectedPairs)
+}
+
+func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithMultiplePeople(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	var (
+		commitMessage = "feat-376 Did some work"
+		authors       = lib.CoAuthors{tam, pete}
+		expectedPairs = lib.CoAuthors{tam, pete}
+		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+	)
+	givenThereIsACommitMessageFile(t, commitMessage)
+	givenThereIsAnAuthorsFile(t, authors)
+	givenThereIsNotAPairsFile()
+
+	_, err := runHook(t, options, []string{"Tam", "Pete", "No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -171,11 +193,19 @@ func givenThereIsAnAuthorsFile(t *testing.T, authors lib.CoAuthors) {
 
 func givenThereIsAPairsFile(t *testing.T, pairs []string) {
 	t.Helper()
-	bytes, err := json.Marshal(pairs)
+	if len(pairs) == 0 {
+		pairs = []string{}
+	}
+
+	b, err := json.Marshal(pairs)
 	assert.NoError(t, err, "could not marshall pairs")
 
-	err = os.WriteFile(pairsFilePath, bytes, 0666)
+	err = os.WriteFile(pairsFilePath, b, 0666)
 	assert.NoError(t, err, "could not write pairs file")
+}
+
+func givenThereIsNotAPairsFile() {
+	_ = os.Remove(pairsFilePath)
 }
 
 func assertPairsFileHasEqualPairs(t *testing.T, expectedPairs lib.CoAuthors) {
@@ -205,10 +235,6 @@ const (
 	authorsFilePath = "test_authors.json"
 	pairsFilePath   = "test_pairs.json"
 )
-
-type inputType interface {
-	string | []byte
-}
 
 func runHook(t *testing.T, options src.Options, textToSubmit []string) (string, error) {
 	t.Helper()
