@@ -8,6 +8,8 @@ import (
 )
 
 func Test_ValidateHook_WorkingAlone_OnTrunk(t *testing.T) {
+	t.Cleanup(cleanup)
+
 	givenThereIsACommitMessageFile(t, "feat-376 Did some work")
 
 	output, err := runValidateHook(t, "trunk", "trunk", false)
@@ -16,6 +18,8 @@ func Test_ValidateHook_WorkingAlone_OnTrunk(t *testing.T) {
 }
 
 func Test_ValidateHook_WorkingAlone_OnBranch(t *testing.T) {
+	t.Cleanup(cleanup)
+
 	givenThereIsACommitMessageFile(t, "feat-376 Did some work")
 
 	output, err := runValidateHook(t, "trunk", "not-trunk", false)
@@ -24,6 +28,8 @@ func Test_ValidateHook_WorkingAlone_OnBranch(t *testing.T) {
 }
 
 func Test_ValidateHook_Pairing_OnTrunk(t *testing.T) {
+	t.Cleanup(cleanup)
+
 	givenThereIsACommitMessageFile(t, "feat-376 Did some work\n"+tam.String())
 
 	_, err := runValidateHook(t, "trunk", "trunk", false)
@@ -31,6 +37,8 @@ func Test_ValidateHook_Pairing_OnTrunk(t *testing.T) {
 }
 
 func Test_ValidateHook_Pairing_OnBranch(t *testing.T) {
+	t.Cleanup(cleanup)
+
 	givenThereIsACommitMessageFile(t, "feat-376 Did some work\n"+tam.String())
 
 	_, err := runValidateHook(t, "trunk", "not-trunk", false)

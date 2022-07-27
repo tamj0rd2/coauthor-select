@@ -5,4 +5,5 @@ type SelectOptions struct {
 	AuthorsFilePath    string
 	PairsFilePath      string
 	ForceSearchPrompts bool
+	Interactive        bool
 }

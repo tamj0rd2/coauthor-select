@@ -10,7 +10,6 @@ import (
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -23,6 +22,7 @@ func init() {
 	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
 	flag.StringVar(&options.PairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
 	flag.BoolVar(&options.ForceSearchPrompts, "forceSearchPrompts", false, "makes all prompts searches for ease of testing")
+	flag.BoolVar(&options.Interactive, "interactive", true, "whether you're using an interactive prompt")
 }
 
 func main() {
@@ -33,7 +33,11 @@ func main() {
 
 	cliApp := NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {
-			return getCoAuthors()
+			if !options.Interactive {
+				return getCoAuthorsNonInteractive(options.AuthorsFilePath, options.PairsFilePath)
+			}
+
+			return getCoAuthorsInteractive()
 		},
 		func(ctx context.Context, pairs lib.CoAuthors) error {
 			b, err := json.Marshal(pairs.Names())
@@ -66,16 +70,7 @@ func main() {
 	}
 }
 
-func getBranchName(ctx context.Context) (string, error) {
-	b, err := exec.CommandContext(ctx, "git", "rev-parse", "--abbrev-ref", "HEAD").CombinedOutput()
-	output := strings.TrimSpace(string(b))
-	if err != nil {
-		return "", fmt.Errorf("failed to get branch name: %w - %s", err, output)
-	}
-	return output, nil
-}
-
-func getCoAuthors() ([]lib.CoAuthor, error) {
+func getCoAuthorsInteractive() ([]lib.CoAuthor, error) {
 	authorsFile, err := os.ReadFile(options.AuthorsFilePath) // TODO: make filepath configurable
 	if err != nil {
 		return nil, err
@@ -87,7 +82,7 @@ func getCoAuthors() ([]lib.CoAuthor, error) {
 		return nil, err
 	}
 
-	previousPairs, wantsToUsePreviousPairs, err := getPreviousPairs()
+	previousPairs, wantsToUsePreviousPairs, err := getPreviousPairsInteractive()
 	if err != nil {
 		return nil, err
 	}
@@ -96,14 +91,14 @@ func getCoAuthors() ([]lib.CoAuthor, error) {
 		return authors.Subset(previousPairs), nil
 	}
 
-	selectedPairs, err := getPairNames(authors.Names())
+	selectedPairs, err := getPairNamesInteractive(authors.Names())
 	if err != nil {
 		return nil, err
 	}
 	return authors.Subset(selectedPairs), nil
 }
 
-func getPreviousPairs() ([]string, bool, error) {
+func getPreviousPairsInteractive() ([]string, bool, error) {
 	var pairs []string
 	pairFile, err := os.ReadFile(options.PairsFilePath)
 	if err != nil {
@@ -133,7 +128,7 @@ func getPreviousPairs() ([]string, bool, error) {
 	return pairs, result == "Yes", nil
 }
 
-func getPairNames(authorNames []string) ([]string, error) {
+func getPairNamesInteractive(authorNames []string) ([]string, error) {
 	const noOneElse = "No one else"
 	authorNamesToChooseFrom := append([]string{noOneElse}, authorNames...)
 	var selectedPairs []string
@@ -164,4 +159,44 @@ func newSearcher(items []string) func(input string, index int) bool {
 		name := strings.ToLower(items[index])
 		return strings.Contains(name, strings.ToLower(input))
 	}
+}
+
+func getCoAuthorsNonInteractive(authorsFilePath string, pairsFilePath string) ([]lib.CoAuthor, error) {
+	authors, err := readJSON[lib.CoAuthors](authorsFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	pairNames, err := readJSON[[]string](pairsFilePath)
+	if err != nil {
+		if !strings.HasPrefix(err.Error(), "failed to read file") {
+			return nil, err
+		}
+	}
+
+	var coAuthors []lib.CoAuthor
+	for _, name := range pairNames {
+		author, err := authors.Get(name)
+		if err != nil {
+			return nil, err
+		}
+
+		coAuthors = append(coAuthors, author)
+	}
+
+	return coAuthors, nil
+}
+
+func readJSON[T any](filePath string) (T, error) {
+	var result T
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return result, fmt.Errorf("failed to read file %q - %w", filePath, err)
+	}
+
+	if err := json.Unmarshal(b, &result); err != nil {
+		return result, fmt.Errorf("failed to unmarshal file %q - %w", filePath, err)
+	}
+
+	return result, nil
 }
