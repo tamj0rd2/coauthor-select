@@ -15,7 +15,8 @@
 # vendor/
 .idea/
 
-blackboxtests
-!blackboxtests/*.go
+blackboxtests/test_authors.json
+blackboxtests/test_pairs.json
+blackboxtests/test_commit_file
 
 example/pairs.json
