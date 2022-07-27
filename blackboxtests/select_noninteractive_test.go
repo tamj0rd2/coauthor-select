@@ -114,7 +114,6 @@ func runNonInteractiveSelectHook(t *testing.T) (string, error) {
 		fmt.Sprintf("--commitFile=%s", commitFilePath),
 		fmt.Sprintf("--authorsFile=%s", authorsFilePath),
 		fmt.Sprintf("--pairsFile=%s", pairsFilePath),
-		fmt.Sprintf("--interactive=%t", false),
 	)
 
 	b, err := cmd.CombinedOutput()

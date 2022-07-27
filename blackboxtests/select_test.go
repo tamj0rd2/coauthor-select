@@ -140,22 +140,23 @@ func runInteractiveSelectHook(t *testing.T, textToSubmit []string) (string, erro
 		fmt.Sprintf("--authorsFile=%s", authorsFilePath),
 		fmt.Sprintf("--pairsFile=%s", pairsFilePath),
 		fmt.Sprintf("--forceSearchPrompts=%t", true),
+		fmt.Sprintf("--interactive=%t", true),
 	)
 
 	cmdStdin, err := cmd.StdinPipe()
 	assert.NoError(t, err)
 
+	var rerr error
+
 	go func() {
 		defer func() {
-			assert.NoError(t, cmdStdin.Close())
+			_ = cmdStdin.Close()
 		}()
 
 		maxIndex := len(textToSubmit) - 1
 		for i, text := range textToSubmit {
 			if _, err := io.WriteString(cmdStdin, text+"\n"); err != nil {
-				err := fmt.Errorf("failed to write %q to stdin: %v\n", text, err)
-				fmt.Println(err)
-				assert.NoError(t, err)
+				panic(fmt.Errorf("failed to write %q to stdin: %v\n", text, err))
 			}
 
 			if i < maxIndex {
@@ -167,5 +168,5 @@ func runInteractiveSelectHook(t *testing.T, textToSubmit []string) (string, erro
 
 	b, err := cmd.CombinedOutput()
 	t.Log("CLI output:\n", string(b))
-	return stripansi.Strip(string(b)), err
+	return stripansi.Strip(string(b)), rerr
 }
