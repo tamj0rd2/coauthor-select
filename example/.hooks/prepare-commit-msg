@@ -1,1 +1,9 @@
-coauthor-select --commitFile=$1
+#!/bin/bash
+set -e
+
+if [ -t 1 ];
+then
+  go run --mod=vendor github.com/tamj0rd2/coauthor-select/cmd/select --commitFile=$1 < /dev/tty
+else
+  go run --mod=vendor github.com/tamj0rd2/coauthor-select/cmd/select --commitFile=$1 --interactive=false
+fi

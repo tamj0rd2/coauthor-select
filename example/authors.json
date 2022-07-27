@@ -1,6 +1,10 @@
 [
   {
-    "Name": "Tam",
-    "Email": "tam@tam.com"
+    "Name": "Person1",
+    "Email": "person1@example.com"
+  },
+  {
+    "Name": "Person2",
+    "Email": "person2@example.com"
   }
 ]
