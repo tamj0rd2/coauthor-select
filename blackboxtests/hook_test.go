@@ -213,9 +213,9 @@ func assertPairsFileHasEqualPairs(t *testing.T, expectedPairs lib.CoAuthors) {
 	b, err := os.ReadFile(pairsFilePath)
 	assert.NoError(t, err, "could not read file %q", pairsFilePath)
 
-	var actualPairs lib.CoAuthors
-	assert.NoError(t, json.Unmarshal(b, &actualPairs))
-	assert.Equal(t, expectedPairs, actualPairs)
+	var actualPairNames []string
+	assert.NoError(t, json.Unmarshal(b, &actualPairNames))
+	assert.Equal(t, expectedPairs.Names(), actualPairNames)
 }
 
 func assertCommitMessageFileHasContents(t *testing.T, message string) {

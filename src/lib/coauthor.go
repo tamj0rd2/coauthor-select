@@ -24,10 +24,11 @@ func (authors CoAuthors) Get(name string) (CoAuthor, error) {
 }
 
 func (authors CoAuthors) Names() []string {
-	var names []string
+	names := []string{} // this is instantiated so that it won't be nil.
 	for _, author := range authors {
 		names = append(names, author.Name)
 	}
+
 	return names
 }
 
