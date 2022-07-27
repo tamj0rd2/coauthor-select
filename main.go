@@ -132,7 +132,7 @@ func getPreviousPairs() ([]string, bool, error) {
 
 	yesOrNo := []string{"Yes", "No"}
 	prompt := promptui.Select{
-		Label:             fmt.Sprintf("Are you still working with these exact people?: %s", strings.Join(pairs, ", ")),
+		Label:             fmt.Sprintf("Are you still working with these exact people? [%s]", strings.Join(pairs, ", ")),
 		Items:             []string{"Yes", "No"},
 		StartInSearchMode: options.ForceSearchPrompts,
 		Searcher:          newSearcher(yesOrNo),
