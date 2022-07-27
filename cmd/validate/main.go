@@ -57,7 +57,7 @@ func main() {
 
 	isUserOnTrunk := strings.ToLower(options.BranchName) == strings.ToLower(options.TrunkName)
 	if !isUserOnTrunk || !options.ProtectTrunk {
-		fmt.Println("Friendly reminder that you should get some feedback on your work occasionally because you're not pairing")
+		fmt.Println("Friendly reminder that 🫵 you should get some feedback on your work occasionally because you're not pairing")
 		return
 	}
 
