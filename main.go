@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/manifoldco/promptui"
+	"github.com/tamj0rd2/coauthor-select/src"
 	"github.com/tamj0rd2/coauthor-select/src/app"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
@@ -15,19 +17,17 @@ import (
 )
 
 var (
-	authorsFilePath string
-	commitFilePath  string
-	pairsFilePath   string
-	trunkName       string
-	branchName      string
+	options src.Options
 )
 
 func init() {
-	flag.StringVar(&authorsFilePath, "authorsFile", "authors.json", "names & emails of teammates")
-	flag.StringVar(&commitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
-	flag.StringVar(&pairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
-	flag.StringVar(&trunkName, "trunkName", "main", "the name of the trunk branch")
-	flag.StringVar(&branchName, "branchName", "", "the branch you're currently on")
+	flag.StringVar(&options.AuthorsFilePath, "authorsFile", "authors.json", "names & emails of teammates")
+	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
+	flag.StringVar(&options.PairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
+	flag.StringVar(&options.TrunkName, "trunkName", "main", "the name of the trunk branch")
+	flag.StringVar(&options.BranchName, "branchName", "", "the branch you're currently on")
+	flag.BoolVar(&options.ForceSearchPrompts, "forceSearchPrompts", false, "makes all prompts searches for ease of testing")
+	flag.BoolVar(&options.ProtectTrunk, "protectTrunk", true, "whether or not to allow working solo on the trunk")
 }
 
 func main() {
@@ -35,34 +35,45 @@ func main() {
 	flag.Parse()
 	log.SetFlags(log.Lshortfile)
 
+	ctx := context.Background()
+	if options.BranchName == "" {
+		options.BranchName, err = getBranchName(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	cliApp := app.NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {
-			return getCoAuthors(authorsFilePath, pairsFilePath)
+			return getCoAuthors()
+		},
+		func(ctx context.Context, pairs lib.CoAuthors) error {
+			b, err := json.Marshal(pairs)
+			if err != nil {
+				return fmt.Errorf("failed to marshal pairs - %w", err)
+			}
+
+			if err := os.WriteFile(options.PairsFilePath, b, 0644); err != nil {
+				return fmt.Errorf("failed to write pairs file - %w", err)
+			}
+			return nil
 		},
 		func(authors lib.CoAuthors) (string, error) {
-			file, err := os.ReadFile(commitFilePath)
+			file, err := os.ReadFile(options.CommitFilePath)
 			if err != nil {
 				return "", fmt.Errorf("failed to read commit message file: %w", err)
 			}
 			return lib.PrepareCommitMessage(string(file), authors), nil
 		},
 		func(ctx context.Context, message string) error {
-			if err := os.WriteFile(commitFilePath, []byte(message), 0644); err != nil {
-				return fmt.Errorf("failed to write commit message file to %q: %w", commitFilePath, err)
+			if err := os.WriteFile(options.CommitFilePath, []byte(message), 0644); err != nil {
+				return fmt.Errorf("failed to write commit message file to %q: %w", options.CommitFilePath, err)
 			}
 			return nil
 		},
 	)
 
-	ctx := context.Background()
-	if branchName == "" {
-		branchName, err = getBranchName(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if err := cliApp.Run(ctx, trunkName, branchName); err != nil {
+	if err := cliApp.Run(ctx, options.TrunkName, options.BranchName, options.ProtectTrunk); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -76,8 +87,8 @@ func getBranchName(ctx context.Context) (string, error) {
 	return output, nil
 }
 
-func getCoAuthors(authorsFilePath string, pairsFilePath string) ([]lib.CoAuthor, error) {
-	authorsFile, err := os.ReadFile(authorsFilePath) // TODO: make filepath configurable
+func getCoAuthors() ([]lib.CoAuthor, error) {
+	authorsFile, err := os.ReadFile(options.AuthorsFilePath) // TODO: make filepath configurable
 	if err != nil {
 		return nil, err
 	}
@@ -88,27 +99,77 @@ func getCoAuthors(authorsFilePath string, pairsFilePath string) ([]lib.CoAuthor,
 		return nil, err
 	}
 
-	// TODO: be able to load the pairs from somewhere other than a file. i.e discord
-	pairFile, err := os.ReadFile(pairsFilePath)
+	previousPairs, wantsToUsePreviousPairs, err := getPreviousPairs()
 	if err != nil {
 		return nil, err
 	}
 
+	if wantsToUsePreviousPairs {
+		return authors.Subset(previousPairs), nil
+	}
+
+	selectedPairs, err := getPairNames(authors.Names())
+	if err != nil {
+		return nil, err
+	}
+	return authors.Subset(selectedPairs), nil
+}
+
+func getPreviousPairs() ([]string, bool, error) {
 	var pairs []string
-	err = json.NewDecoder(bytes.NewReader(pairFile)).Decode(&pairs)
+	pairFile, err := os.ReadFile(options.PairsFilePath)
 	if err != nil {
-		return nil, err
+		return nil, false, nil
 	}
 
-	var coAuthors []lib.CoAuthor
-	for _, name := range pairs {
-		author, err := authors.Get(name)
-		if err != nil {
-			return nil, err
+	if err = json.NewDecoder(bytes.NewReader(pairFile)).Decode(&pairs); err != nil {
+		return nil, false, fmt.Errorf("failed to decode pairs file %q - %w", options.PairsFilePath, err)
+	}
+
+	yesOrNo := []string{"Yes", "No"}
+	prompt := promptui.Select{
+		Label:             fmt.Sprintf("Are you still working with these exact people?: %s", strings.Join(pairs, ", ")),
+		Items:             []string{"Yes", "No"},
+		StartInSearchMode: options.ForceSearchPrompts,
+		Searcher:          newSearcher(yesOrNo),
+	}
+	_, result, err := prompt.Run()
+	if err != nil {
+		return nil, false, fmt.Errorf("failed to figure out if you're still pairing with the same people: %w", err)
+	}
+
+	return pairs, result == "Yes", nil
+}
+
+func getPairNames(authorNames []string) ([]string, error) {
+	const noOneElse = "No one else"
+	authorNamesToChooseFrom := append([]string{noOneElse}, authorNames...)
+	var selectedPairs []string
+
+	for {
+		pairSelection := promptui.Select{
+			Label:             "Who else are you working with?",
+			Items:             authorNamesToChooseFrom,
+			StartInSearchMode: true,
+			Searcher:          newSearcher(authorNamesToChooseFrom),
 		}
 
-		coAuthors = append(coAuthors, author)
-	}
+		_, pairName, err := pairSelection.Run()
+		if err != nil {
+			return nil, fmt.Errorf("failed to select pair - %w", err)
+		}
 
-	return coAuthors, nil
+		if pairName == noOneElse {
+			return selectedPairs, nil
+		}
+
+		selectedPairs = append(selectedPairs, pairName)
+	}
+}
+
+func newSearcher(items []string) func(input string, index int) bool {
+	return func(input string, index int) bool {
+		name := strings.ToLower(items[index])
+		return strings.Contains(name, strings.ToLower(input))
+	}
 }

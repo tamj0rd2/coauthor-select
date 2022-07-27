@@ -23,6 +23,24 @@ func (authors CoAuthors) Get(name string) (CoAuthor, error) {
 	return CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
 }
 
+func (authors CoAuthors) Names() []string {
+	var names []string
+	for _, author := range authors {
+		names = append(names, author.Name)
+	}
+	return names
+}
+
 func (authors CoAuthors) Any() bool {
 	return len(authors) > 0
+}
+
+func (authors CoAuthors) Subset(names []string) []CoAuthor {
+	var subset CoAuthors
+	for _, name := range names {
+		if author, err := authors.Get(name); err == nil {
+			subset = append(subset, author)
+		}
+	}
+	return subset
 }
