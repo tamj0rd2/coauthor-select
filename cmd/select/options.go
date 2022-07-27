@@ -1,4 +1,4 @@
-package src
+package main
 
 type SelectOptions struct {
 	CommitFilePath     string

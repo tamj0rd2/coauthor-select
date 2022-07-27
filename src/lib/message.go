@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -27,4 +29,16 @@ func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	}
 
 	return message
+}
+
+func LoadCommitMessage(filePath string) (string, error) {
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read commit message file %q - %w", filePath, err)
+	}
+	return string(b), nil
+}
+
+func DoesCommitContainCoAuthors(input string) bool {
+	return strings.Contains(input, "Co-authored-by: ")
 }

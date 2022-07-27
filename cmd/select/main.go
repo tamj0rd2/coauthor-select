@@ -7,7 +7,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/manifoldco/promptui"
-	"github.com/tamj0rd2/coauthor-select/src"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
 	"os"
@@ -16,7 +15,7 @@ import (
 )
 
 var (
-	options src.SelectOptions
+	options SelectOptions
 )
 
 func init() {
