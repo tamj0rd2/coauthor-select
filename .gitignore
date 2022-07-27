@@ -20,3 +20,4 @@ blackboxtests/test_pairs.json
 blackboxtests/test_commit_file
 
 example/pairs.json
+pairs.json

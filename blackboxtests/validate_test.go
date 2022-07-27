@@ -14,7 +14,7 @@ func Test_ValidateHook_WorkingAlone_OnTrunk(t *testing.T) {
 
 	output, err := runValidateHook(t, "trunk", "trunk", false)
 	assert.Error(t, err)
-	assert.Contains(t, output, `you can't commit to "trunk" without pairing`)
+	assert.Contains(t, output, `Can't commit to trunk without a pair`)
 }
 
 func Test_ValidateHook_WorkingAlone_OnBranch(t *testing.T) {

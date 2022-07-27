@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
@@ -60,5 +61,13 @@ func main() {
 		return
 	}
 
-	log.Fatal(fmt.Errorf("you can't commit to %q without pairing", options.BranchName))
+	log.Fatal(newPairsRequiredError(options.TrunkName))
+}
+
+func newPairsRequiredError(trunkName string) error {
+	message := fmt.Sprintf("🚨 - Can't commit to %s without a pair", trunkName)
+	message += "\nOptions:"
+	message += "\n  - get someone to quickly jump in and review your changes so you can select them as a pair for this commit"
+	message += "\n  - checkout a branch, make commits on there and make a PR when you're ready for review"
+	return errors.New(message)
 }
