@@ -83,7 +83,7 @@ func TestHookWhenSomeoneIs_WorkingAlone_OnTheTrunk_AndBranchProtectionIsEnabled(
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs lib.CoAuthors
+		expectedPairs = lib.CoAuthors{}
 		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
@@ -101,7 +101,7 @@ func TestHookWhenSomeoneIs_WorkingAlone_OnTheTrunk_AndBranchProtectionIsDisabled
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs lib.CoAuthors
+		expectedPairs = lib.CoAuthors{}
 		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(false).Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
@@ -118,7 +118,7 @@ func TestHookWhenSomeoneIs_WorkingAlone_OnABranch(t *testing.T) {
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs lib.CoAuthors
+		expectedPairs = lib.CoAuthors{}
 		options       = newOptions().WorkingOnBranchWithProtectionSetTo(true).Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)

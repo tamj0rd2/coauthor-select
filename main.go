@@ -48,6 +48,10 @@ func main() {
 			return getCoAuthors()
 		},
 		func(ctx context.Context, pairs lib.CoAuthors) error {
+			if pairs == nil {
+				pairs = lib.CoAuthors{}
+			}
+
 			b, err := json.Marshal(pairs)
 			if err != nil {
 				return fmt.Errorf("failed to marshal pairs - %w", err)
