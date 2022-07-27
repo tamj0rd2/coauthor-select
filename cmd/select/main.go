@@ -17,31 +17,21 @@ import (
 )
 
 var (
-	options src.Options
+	options src.SelectOptions
 )
 
 func init() {
 	flag.StringVar(&options.AuthorsFilePath, "authorsFile", "authors.json", "names & emails of teammates")
 	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
 	flag.StringVar(&options.PairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
-	flag.StringVar(&options.TrunkName, "trunkName", "main", "the name of the trunk branch")
-	flag.StringVar(&options.BranchName, "branchName", "", "the branch you're currently on")
 	flag.BoolVar(&options.ForceSearchPrompts, "forceSearchPrompts", false, "makes all prompts searches for ease of testing")
-	flag.BoolVar(&options.ProtectTrunk, "protectTrunk", true, "whether or not to allow working solo on the trunk")
 }
 
 func main() {
-	var err error
 	flag.Parse()
 	log.SetFlags(log.Lshortfile)
 
 	ctx := context.Background()
-	if options.BranchName == "" {
-		options.BranchName, err = getBranchName(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 
 	cliApp := app.NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {
@@ -73,7 +63,7 @@ func main() {
 		},
 	)
 
-	if err := cliApp.Run(ctx, options.TrunkName, options.BranchName, options.ProtectTrunk); err != nil {
+	if err := cliApp.Run(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

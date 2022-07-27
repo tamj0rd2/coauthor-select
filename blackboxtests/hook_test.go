@@ -14,14 +14,34 @@ import (
 	"time"
 )
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithASinglePerson(t *testing.T) {
+func TestHookWhenSomeoneIs_WorkingAlone(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	var (
+		commitMessage = "feat-376 Did some work"
+		authors       = lib.CoAuthors{tam, pete}
+		expectedPairs = lib.CoAuthors{}
+		options       = newOptions().Build()
+	)
+	givenThereIsACommitMessageFile(t, commitMessage)
+	givenThereIsAnAuthorsFile(t, authors)
+
+	_, err := runHook(t, options, []string{"No one else"})
+	assert.NoError(t, err)
+
+	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
+	assertCommitMessageFileHasContents(t, expectedMessage)
+	assertPairsFileHasEqualPairs(t, expectedPairs)
+}
+
+func TestHookWhenSomeoneIs_Pairing_ForTheFirstTime_WithASinglePerson(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
 		expectedPairs = lib.CoAuthors{tam}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+		options       = newOptions().Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
@@ -35,14 +55,14 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithASinglePerson(t
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithMultiplePeople(t *testing.T) {
+func TestHookWhenSomeoneIs_Pairing_ForTheFirstTime_WithMultiplePeople(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
 		expectedPairs = lib.CoAuthors{tam, pete}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+		options       = newOptions().Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
@@ -56,14 +76,14 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_ForTheFirstTime_WithMultiplePeople(
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithTheSamePersonAsLastTime(t *testing.T) {
+func TestHookWhenSomeoneIs_Pairing_WithTheSamePersonAsLastTime(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
 		commitMessage = "feat-376 Did some work"
 		authors       = lib.CoAuthors{tam, pete}
 		expectedPairs = lib.CoAuthors{pete}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+		options       = newOptions().Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
@@ -77,7 +97,7 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithTheSamePersonAsLastTime(t *test
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithDifferentPeopleThanLastTime(t *testing.T) {
+func TestHookWhenSomeoneIs_Pairing_WithDifferentPeopleThanLastTime(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
@@ -85,7 +105,7 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithDifferentPeopleThanLastTime(t *
 		authors       = lib.CoAuthors{tam, pete}
 		previousPairs = lib.CoAuthors{pete}
 		expectedPairs = lib.CoAuthors{tam}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+		options       = newOptions().Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
@@ -99,7 +119,7 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_WithDifferentPeopleThanLastTime(t *
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
-func TestHookWhenSomeoneIs_PairingOnTheTrunk_AndWasWorkingAloneLastTime(t *testing.T) {
+func TestHookWhenSomeoneIs_Pairing_ButWasWorkingAloneLastTime(t *testing.T) {
 	t.Cleanup(cleanup)
 
 	var (
@@ -107,68 +127,13 @@ func TestHookWhenSomeoneIs_PairingOnTheTrunk_AndWasWorkingAloneLastTime(t *testi
 		authors       = lib.CoAuthors{tam, pete}
 		previousPairs = lib.CoAuthors{}
 		expectedPairs = lib.CoAuthors{tam}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
+		options       = newOptions().Build()
 	)
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsAPairsFile(t, previousPairs.Names())
 
 	_, err := runHook(t, options, []string{"Tam", "No one else"})
-	assert.NoError(t, err)
-
-	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
-	assertCommitMessageFileHasContents(t, expectedMessage)
-	assertPairsFileHasEqualPairs(t, expectedPairs)
-}
-
-func TestHookWhenSomeoneIs_WorkingAlone_OnTheTrunk_AndBranchProtectionIsEnabled(t *testing.T) {
-	t.Cleanup(cleanup)
-
-	var (
-		commitMessage = "feat-376 Did some work"
-		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs = lib.CoAuthors{}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(true).Build()
-	)
-	givenThereIsACommitMessageFile(t, commitMessage)
-	givenThereIsAnAuthorsFile(t, authors)
-
-	output, err := runHook(t, options, []string{"No one else"})
-	assert.Error(t, err)
-	assert.Contains(t, output, fmt.Sprintf("can't commit to %s without a pair", options.TrunkName))
-	assertPairsFileHasEqualPairs(t, expectedPairs)
-}
-
-func TestHookWhenSomeoneIs_WorkingAlone_OnTheTrunk_AndBranchProtectionIsDisabled(t *testing.T) {
-	t.Cleanup(cleanup)
-
-	var (
-		commitMessage = "feat-376 Did some work"
-		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs = lib.CoAuthors{}
-		options       = newOptions().WorkingOnTrunkWithProtectionSetTo(false).Build()
-	)
-	givenThereIsACommitMessageFile(t, commitMessage)
-	givenThereIsAnAuthorsFile(t, authors)
-
-	_, err := runHook(t, options, []string{"No one else"})
-	assert.NoError(t, err)
-	assertPairsFileHasEqualPairs(t, expectedPairs)
-}
-
-func TestHookWhenSomeoneIs_WorkingAlone_OnABranch(t *testing.T) {
-	t.Cleanup(cleanup)
-
-	var (
-		commitMessage = "feat-376 Did some work"
-		authors       = lib.CoAuthors{tam, pete}
-		expectedPairs = lib.CoAuthors{}
-		options       = newOptions().WorkingOnBranchWithProtectionSetTo(true).Build()
-	)
-	givenThereIsACommitMessageFile(t, commitMessage)
-	givenThereIsAnAuthorsFile(t, authors)
-
-	_, err := runHook(t, options, []string{"No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -236,16 +201,13 @@ const (
 	pairsFilePath   = "test_pairs.json"
 )
 
-func runHook(t *testing.T, options src.Options, textToSubmit []string) (string, error) {
+func runHook(t *testing.T, options src.SelectOptions, textToSubmit []string) (string, error) {
 	t.Helper()
 	cmd := exec.Command(
-		"go", "run", "../main.go",
+		"go", "run", "../cmd/select/main.go",
 		fmt.Sprintf("--commitFile=%s", options.CommitFilePath),
 		fmt.Sprintf("--authorsFile=%s", options.AuthorsFilePath),
 		fmt.Sprintf("--pairsFile=%s", options.PairsFilePath),
-		fmt.Sprintf("--trunkName=%s", options.TrunkName),
-		fmt.Sprintf("--branchName=%s", options.BranchName),
-		fmt.Sprintf("--protectTrunk=%t", options.ProtectTrunk),
 		fmt.Sprintf("--forceSearchPrompts=%t", options.ForceSearchPrompts),
 	)
 
@@ -284,37 +246,20 @@ func cleanup() {
 }
 
 type optionsBuilder struct {
-	options src.Options
+	options src.SelectOptions
 }
 
 func newOptions() optionsBuilder {
 	return optionsBuilder{
-		options: src.Options{
+		options: src.SelectOptions{
 			CommitFilePath:     commitFilePath,
 			AuthorsFilePath:    authorsFilePath,
 			PairsFilePath:      pairsFilePath,
-			TrunkName:          "trunk",
-			BranchName:         "trunk",
-			ProtectTrunk:       true,
 			ForceSearchPrompts: true,
 		},
 	}
 }
 
-func (b optionsBuilder) Build() src.Options {
+func (b optionsBuilder) Build() src.SelectOptions {
 	return b.options
-}
-
-func (b optionsBuilder) WorkingOnTrunkWithProtectionSetTo(protect bool) optionsBuilder {
-	b.options.TrunkName = "trunk"
-	b.options.BranchName = "trunk"
-	b.options.ProtectTrunk = protect
-	return b
-}
-
-func (b optionsBuilder) WorkingOnBranchWithProtectionSetTo(protect bool) optionsBuilder {
-	b.options.TrunkName = "trunk"
-	b.options.BranchName = "not-trunk"
-	b.options.ProtectTrunk = protect
-	return b
 }

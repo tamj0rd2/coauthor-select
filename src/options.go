@@ -1,11 +1,8 @@
 package src
 
-type Options struct {
+type SelectOptions struct {
 	CommitFilePath     string
 	AuthorsFilePath    string
 	PairsFilePath      string
-	TrunkName          string
-	BranchName         string
-	ProtectTrunk       bool
 	ForceSearchPrompts bool
 }

@@ -2,10 +2,8 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
-	"strings"
 )
 
 type GetPairs func(ctx context.Context) (lib.CoAuthors, error)
@@ -37,7 +35,7 @@ func NewCLIApp(
 	}
 }
 
-func (c CLIApp) Run(ctx context.Context, trunkName string, branchName string, shouldProtectTrunk bool) error {
+func (c CLIApp) Run(ctx context.Context) error {
 	pairs, err := c.getPairs(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get pairs: %w", err)
@@ -49,9 +47,6 @@ func (c CLIApp) Run(ctx context.Context, trunkName string, branchName string, sh
 	}
 
 	if !pairs.Any() {
-		if shouldProtectTrunk && strings.ToLower(branchName) == strings.ToLower(trunkName) {
-			return newPairsRequiredError(branchName)
-		}
 		return nil
 	}
 
@@ -66,12 +61,4 @@ func (c CLIApp) Run(ctx context.Context, trunkName string, branchName string, sh
 
 	fmt.Println("Added co-authors:", pairs)
 	return nil
-}
-
-func newPairsRequiredError(trunkName string) error {
-	message := fmt.Sprintf("can't commit to %s without a pair", trunkName)
-	message += "\nOptions:"
-	message += "\n  - get someone to quickly jump in and review your changes so you can select them as a pair for this commit"
-	message += "\n  - checkout a branch, make commits on there and make a PR when you're ready for review"
-	return errors.New(message)
 }
