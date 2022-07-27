@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/manifoldco/promptui"
 	"github.com/tamj0rd2/coauthor-select/src"
-	"github.com/tamj0rd2/coauthor-select/src/app"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
 	"os"
@@ -33,7 +32,7 @@ func main() {
 
 	ctx := context.Background()
 
-	cliApp := app.NewCLIApp(
+	cliApp := NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {
 			return getCoAuthors()
 		},
