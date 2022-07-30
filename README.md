@@ -12,7 +12,7 @@ These docs are WIP :)
 3. Run `go mod tidy && go mod vendor`
 4. Create a hooks folder `mkdir .hooks` in your project and enable it as the git hooks folder `git config core.hooksPath .hooks`
 5. Copy /examples/.hooks to your repo and make all files executable
-6. Create an `authors.json` file like [this](./example/authors.json)
+6. Create a `.coauthors` file like [this](./example/.coauthors)
 
 ## Specifying pairs via the command line
 

@@ -18,11 +18,16 @@ func main() {
 
 	cliApp := NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {
-			if !options.Interactive {
-				return getCoAuthorsNonInteractive(options.AuthorsFilePath, options.PairsFilePath)
+			authors, err := readAuthorsFile(options.AuthorsFilePath)
+			if err != nil {
+				return nil, err
 			}
 
-			return getCoAuthorsInteractive(options)
+			if !options.Interactive {
+				return getCoAuthorsNonInteractive(options.PairsFilePath, authors)
+			}
+
+			return getCoAuthorsInteractive(options, authors)
 		},
 		func(ctx context.Context, pairs lib.CoAuthors) error {
 			b, err := json.Marshal(pairs.Names())
@@ -55,18 +60,7 @@ func main() {
 	}
 }
 
-func getCoAuthorsInteractive(options selectOptions) ([]lib.CoAuthor, error) {
-	authorsFile, err := os.ReadFile(options.AuthorsFilePath) // TODO: make filepath configurable
-	if err != nil {
-		return nil, err
-	}
-
-	var authors lib.CoAuthors
-	err = json.NewDecoder(bytes.NewReader(authorsFile)).Decode(&authors)
-	if err != nil {
-		return nil, err
-	}
-
+func getCoAuthorsInteractive(options selectOptions, authors lib.CoAuthors) ([]lib.CoAuthor, error) {
 	previousPairs, wantsToUsePreviousPairs, err := getPreviousPairsInteractive(options)
 	if err != nil {
 		return nil, err
@@ -146,12 +140,7 @@ func newSearcher(items []string) func(input string, index int) bool {
 	}
 }
 
-func getCoAuthorsNonInteractive(authorsFilePath string, pairsFilePath string) ([]lib.CoAuthor, error) {
-	authors, err := readJSON[lib.CoAuthors](authorsFilePath)
-	if err != nil {
-		return nil, err
-	}
-
+func getCoAuthorsNonInteractive(pairsFilePath string, authors lib.CoAuthors) ([]lib.CoAuthor, error) {
 	pairNames, err := readJSON[[]string](pairsFilePath)
 	if err != nil {
 		if !strings.HasPrefix(err.Error(), "failed to read file") {
@@ -170,6 +159,20 @@ func getCoAuthorsNonInteractive(authorsFilePath string, pairsFilePath string) ([
 	}
 
 	return coAuthors, nil
+}
+
+func readAuthorsFile(filePath string) (lib.CoAuthors, error) {
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read authors file %q - %w", filePath, err)
+	}
+
+	var authors lib.CoAuthors
+	if err := authors.From(b); err != nil {
+		return nil, fmt.Errorf("failed to parse authors file %q - %w", filePath, err)
+	}
+
+	return authors, nil
 }
 
 func readJSON[T any](filePath string) (T, error) {

@@ -7,10 +7,23 @@ import (
 )
 
 func TestCoAuthor_String(t *testing.T) {
-	coauthor := lib.CoAuthor{
-		Name:  "John Doe",
-		Email: "john@doe.com",
-	}
+	assert.Equal(t, "Co-authored-by: John Doe <john@doe.com>", john.String())
+}
 
-	assert.Equal(t, "Co-authored-by: John Doe <john@doe.com>", coauthor.String())
+func TestCoAuthor_UserID(t *testing.T) {
+	assert.Equal(t, "John Doe <john@doe.com>", john.UserID())
+}
+
+func TestCoAuthors_String(t *testing.T) {
+	coAuthors := lib.CoAuthors{john, mary}
+	assert.Equal(t, "John Doe <john@doe.com>\nMary Sue <m.sue@example.com>", coAuthors.String())
+}
+
+func TestCoAuthors_From(t *testing.T) {
+	input := "John Doe <john@doe.com>\nMary Sue <m.sue@example.com>"
+
+	var coAuthors lib.CoAuthors
+	assert.NoError(t, coAuthors.From([]byte(input)))
+
+	assert.Equal(t, lib.CoAuthors{john, mary}, coAuthors)
 }

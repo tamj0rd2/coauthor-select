@@ -10,6 +10,7 @@ import (
 var (
 	tam    = lib.CoAuthor{Name: "tam", Email: "t@am.com"}
 	john   = lib.CoAuthor{Name: "John Doe", Email: "john@doe.com"}
+	mary   = lib.CoAuthor{Name: "Mary Sue", Email: "m.sue@example.com"}
 	rizzle = lib.CoAuthor{Name: "rizzle", Email: "rizzle@kicks.co"}
 )
 

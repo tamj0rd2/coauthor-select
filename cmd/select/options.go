@@ -21,7 +21,7 @@ func parseOptions() selectOptions {
 		}
 	)
 
-	flag.StringVar(&options.AuthorsFilePath, "authorsFile", "authors.json", "names & emails of teammates")
+	flag.StringVar(&options.AuthorsFilePath, "authorsFile", ".coauthors", "names & emails of teammates")
 	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
 	flag.StringVar(&options.PairsFilePath, "pairsFile", "pairs.json", "path to pairs file")
 	flag.BoolVar(&options.ForceSearchPrompts, "forceSearchPrompts", false, "makes all prompts searches for ease of testing")

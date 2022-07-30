@@ -8,6 +8,13 @@ import (
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	cleanup()
+	code := m.Run()
+	cleanup()
+	os.Exit(code)
+}
+
 func givenThereIsACommitMessageFile(t *testing.T, message string) {
 	t.Helper()
 	err := os.WriteFile(commitFilePath, []byte(message), 0666)
@@ -16,10 +23,9 @@ func givenThereIsACommitMessageFile(t *testing.T, message string) {
 
 func givenThereIsAnAuthorsFile(t *testing.T, authors lib.CoAuthors) {
 	t.Helper()
-	bytes, err := json.Marshal(authors)
-	assert.NoError(t, err, "could not marshall authors")
+	bytes := []byte(authors.String())
 
-	err = os.WriteFile(authorsFilePath, bytes, 0666)
+	err := os.WriteFile(authorsFilePath, bytes, 0666)
 	assert.NoError(t, err, "could not write authors file")
 }
 

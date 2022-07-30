@@ -1,17 +1,37 @@
 package lib
 
-import "fmt"
+import (
+	"fmt"
+	"regexp"
+	"strings"
+)
 
 type CoAuthor struct {
 	Name  string
 	Email string
 }
 
+func newCoAuthor(name string, email string) CoAuthor {
+	return CoAuthor{Name: name, Email: email}
+}
+
 func (c CoAuthor) String() string {
-	return fmt.Sprintf("Co-authored-by: %s <%s>", c.Name, c.Email)
+	return fmt.Sprintf("Co-authored-by: %s", c.UserID())
+}
+
+func (c CoAuthor) UserID() string {
+	return fmt.Sprintf("%s <%s>", c.Name, c.Email)
 }
 
 type CoAuthors []CoAuthor
+
+func (authors CoAuthors) String() string {
+	var coAuthorStrings []string
+	for _, author := range authors {
+		coAuthorStrings = append(coAuthorStrings, author.UserID())
+	}
+	return strings.Join(coAuthorStrings, "\n")
+}
 
 func (authors CoAuthors) Get(name string) (CoAuthor, error) {
 	for _, author := range authors {
@@ -44,4 +64,16 @@ func (authors CoAuthors) Subset(names []string) []CoAuthor {
 		}
 	}
 	return subset
+}
+
+func (authors *CoAuthors) From(bytes []byte) error {
+	rxp := regexp.MustCompile(`(.*) <(.*)>`)
+	matchGroups := rxp.FindAllStringSubmatch(string(bytes), -1)
+	for _, group := range matchGroups {
+		if len(group) != 3 {
+			return fmt.Errorf("invalid author format: %s. Should be like: Name <email@example.com>", group[0])
+		}
+		*authors = append(*authors, newCoAuthor(group[1], group[2]))
+	}
+	return nil
 }
