@@ -1,9 +1,18 @@
 #!/bin/bash
 set -e
 
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD);
+if [ "$BRANCH_NAME" == 'HEAD' ] ; then
+    # if there's no branch name it must mean we're in a rebase. We don't want to update the commit message of rebased
+    # commits.
+    exit 0
+fi
+
 if [ -t 1 ];
 then
+  # interactively select coauthors if we're in an interactive shell
   go run --mod=vendor github.com/tamj0rd2/coauthor-select/cmd/select --commitFile=$1 < /dev/tty
 else
+  # otherwise, try to select coauthors using pairs.json
   go run --mod=vendor github.com/tamj0rd2/coauthor-select/cmd/select --commitFile=$1 --interactive=false
 fi
