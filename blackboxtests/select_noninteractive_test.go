@@ -107,6 +107,23 @@ func Test_NonInteractiveSelectHook_WhenSomeoneIs_Pairing_WithSomeoneWhoIsAlready
 	assertCommitMessageFileContainsContents(t, tam.String())
 }
 
+func Test_NonInteractiveSelectHook_WhenSomeoneIs_Pairing_WithSomeoneWhoIsUnspecifiedInTheAuthorsFile(t *testing.T) {
+	t.Cleanup(cleanup)
+
+	var (
+		commitMessage = "feat-376 Did some work\n" + pete.String()
+		authors       = lib.CoAuthors{tam}
+		pairs         = lib.CoAuthors{pete}
+	)
+	givenThereIsACommitMessageFile(t, commitMessage)
+	givenThereIsAnAuthorsFile(t, authors)
+	givenThereIsAPairsFile(t, pairs.Names())
+
+	output, err := runNonInteractiveSelectHook(t)
+	assert.Error(t, err)
+	assert.Contains(t, output, `author "Pete" is not specified in the authors file`)
+}
+
 func runNonInteractiveSelectHook(t *testing.T) (string, error) {
 	t.Helper()
 	cmd := exec.Command(

@@ -40,7 +40,8 @@ func (authors CoAuthors) Get(name string) (CoAuthor, error) {
 		}
 	}
 
-	return CoAuthor{}, fmt.Errorf("author %s not present in the authors file", name)
+	validNames := strings.Join(authors.Names(), ", ")
+	return CoAuthor{}, fmt.Errorf("author %q is not specified in the authors file. valid options: [%s]", name, validNames)
 }
 
 func (authors CoAuthors) Names() []string {
