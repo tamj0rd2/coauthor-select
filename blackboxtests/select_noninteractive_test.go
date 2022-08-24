@@ -128,7 +128,7 @@ func Test_NonInteractiveSelectHook_WhenSomeoneIs_Pairing_WithSomeoneWhoIsUnspeci
 func runNonInteractiveSelectHook(t *testing.T) (string, error) {
 	t.Helper()
 	cmd := exec.Command(
-		"go", "run", "../cmd/select/...",
+		"go", "run", "../...", "select",
 		fmt.Sprintf("--commitFile=%s", commitFilePath),
 		fmt.Sprintf("--authorsFile=%s", authorsFilePath),
 		fmt.Sprintf("--pairsFile=%s", pairsFilePath),
