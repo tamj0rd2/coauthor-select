@@ -2,13 +2,13 @@ package blackboxtests
 
 import (
 	"fmt"
-	"github.com/acarl005/stripansi"
-	"github.com/alecthomas/assert/v2"
-	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"io"
 	"os/exec"
 	"testing"
 	"time"
+
+	"github.com/alecthomas/assert/v2"
+	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
 func Test_InteractiveSelectHook_WhenSomeoneIs_WorkingAlone(t *testing.T) {
@@ -22,7 +22,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_WorkingAlone(t *testing.T) {
 	givenThereIsACommitMessageFile(t, commitMessage)
 	givenThereIsAnAuthorsFile(t, authors)
 
-	_, err := runInteractiveSelectHook(t, []string{"No one else"})
+	err := runInteractiveSelectHook(t, []string{"No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -42,7 +42,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_ForTheFirstTime_WithASingl
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsNotAPairsFile()
 
-	_, err := runInteractiveSelectHook(t, []string{"Tam", "No one else"})
+	err := runInteractiveSelectHook(t, []string{"Tam", "No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -62,7 +62,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_ForTheFirstTime_WithMultip
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsNotAPairsFile()
 
-	_, err := runInteractiveSelectHook(t, []string{"Tam", "Pete", "No one else"})
+	err := runInteractiveSelectHook(t, []string{"Tam", "Pete", "No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -82,7 +82,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_WithTheSamePersonAsLastTim
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsAPairsFile(t, expectedPairs.Names())
 
-	_, err := runInteractiveSelectHook(t, []string{"Yes"})
+	err := runInteractiveSelectHook(t, []string{"Yes"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -103,7 +103,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_WithDifferentPeopleThanLas
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsAPairsFile(t, previousPairs.Names())
 
-	_, err := runInteractiveSelectHook(t, []string{"No", "Tam", "No one else"})
+	err := runInteractiveSelectHook(t, []string{"No", "Tam", "No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -124,7 +124,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_ButWasWorkingAloneLastTime
 	givenThereIsAnAuthorsFile(t, authors)
 	givenThereIsAPairsFile(t, previousPairs.Names())
 
-	_, err := runInteractiveSelectHook(t, []string{"Tam", "No one else"})
+	err := runInteractiveSelectHook(t, []string{"Tam", "No one else"})
 	assert.NoError(t, err)
 
 	expectedMessage := lib.PrepareCommitMessage(commitMessage, expectedPairs)
@@ -132,7 +132,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_ButWasWorkingAloneLastTime
 	assertPairsFileHasEqualPairs(t, expectedPairs)
 }
 
-func runInteractiveSelectHook(t *testing.T, textToSubmit []string) (string, error) {
+func runInteractiveSelectHook(t *testing.T, textToSubmit []string) error {
 	t.Helper()
 	cmd := exec.Command(
 		"go", "run", "../cmd/select/...",
@@ -145,8 +145,6 @@ func runInteractiveSelectHook(t *testing.T, textToSubmit []string) (string, erro
 
 	cmdStdin, err := cmd.StdinPipe()
 	assert.NoError(t, err)
-
-	var rerr error
 
 	go func() {
 		defer func() {
@@ -168,5 +166,5 @@ func runInteractiveSelectHook(t *testing.T, textToSubmit []string) (string, erro
 
 	b, err := cmd.CombinedOutput()
 	t.Log("CLI output:\n", string(b))
-	return stripansi.Strip(string(b)), rerr
+	return err
 }

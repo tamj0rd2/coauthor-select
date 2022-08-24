@@ -5,11 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/manifoldco/promptui"
-	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/manifoldco/promptui"
+	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 				return fmt.Errorf("failed to marshal pairs - %w", err)
 			}
 
-			if err := os.WriteFile(options.PairsFilePath, b, 0644); err != nil {
+			if err := os.WriteFile(options.PairsFilePath, b, 0o644); err != nil {
 				return fmt.Errorf("failed to write pairs file - %w", err)
 			}
 			return nil
@@ -48,7 +49,7 @@ func main() {
 			return lib.PrepareCommitMessage(string(file), authors), nil
 		},
 		func(ctx context.Context, message string) error {
-			if err := os.WriteFile(options.CommitFilePath, []byte(message), 0644); err != nil {
+			if err := os.WriteFile(options.CommitFilePath, []byte(message), 0o644); err != nil {
 				return fmt.Errorf("failed to write commit message file to %q: %w", options.CommitFilePath, err)
 			}
 			return nil

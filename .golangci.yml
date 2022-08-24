@@ -1,0 +1,22 @@
+run:
+  go: '1.19'
+
+linters-settings:
+  goimports:
+    # Separate internal packages from external
+    local-prefixes: github.com/tamj0rd2/coauthor-select
+
+linters:
+  # Enable extra linters besides the default ones
+  enable:
+    - gci
+    - godot
+    - goconst
+    - gofumpt
+    - govet
+    - stylecheck
+    - unconvert
+    - unparam
+    - misspell
+    - whitespace
+    - bodyclose

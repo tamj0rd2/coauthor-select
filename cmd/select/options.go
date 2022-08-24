@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/mattn/go-isatty"
 	"os"
+
+	"github.com/mattn/go-isatty"
 )
 
 type selectOptions struct {
@@ -15,11 +16,9 @@ type selectOptions struct {
 }
 
 func parseOptions() selectOptions {
-	var (
-		options = selectOptions{
-			Interactive: isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()),
-		}
-	)
+	options := selectOptions{
+		Interactive: isatty.IsTerminal(os.Stdout.Fd()) || isatty.IsCygwinTerminal(os.Stdout.Fd()),
+	}
 
 	flag.StringVar(&options.AuthorsFilePath, "authorsFile", ".coauthors", "names & emails of teammates")
 	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")

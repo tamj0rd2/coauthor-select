@@ -1,9 +1,10 @@
 package lib_test
 
 import (
+	"testing"
+
 	"github.com/alecthomas/assert/v2"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
-	"testing"
 )
 
 func TestCoAuthor_String(t *testing.T) {

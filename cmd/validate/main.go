@@ -4,15 +4,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"log"
 	"os/exec"
 	"strings"
+
+	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
-var (
-	options ValidateOptions
-)
+var options ValidateOptions
 
 type ValidateOptions struct {
 	CommitFilePath string
@@ -55,7 +54,7 @@ func main() {
 		return
 	}
 
-	isUserOnTrunk := strings.ToLower(options.BranchName) == strings.ToLower(options.TrunkName)
+	isUserOnTrunk := strings.EqualFold(options.BranchName, options.TrunkName)
 	if !isUserOnTrunk || !options.ProtectTrunk {
 		fmt.Println("Friendly reminder that 🫵 you should get some feedback on your work occasionally because you're not pairing")
 		return
