@@ -63,7 +63,7 @@ func Test_ValidateHook_Pairing_OnBranch(t *testing.T) {
 }
 
 func runValidateHook(t *testing.T, branchName string, protectTrunk bool) (string, error) {
-	cmd := exec.Command("go", "run", "../cmd/validate/...",
+	cmd := exec.Command("go", "run", "../...", "validate",
 		fmt.Sprintf("--commitFile=%s", commitFilePath),
 		fmt.Sprintf("--trunkName=%s", trunk),
 		fmt.Sprintf("--branchName=%s", branchName),

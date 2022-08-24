@@ -135,7 +135,7 @@ func Test_InteractiveSelectHook_WhenSomeoneIs_Pairing_ButWasWorkingAloneLastTime
 func runInteractiveSelectHook(t *testing.T, textToSubmit []string) error {
 	t.Helper()
 	cmd := exec.Command(
-		"go", "run", "../cmd/select/...",
+		"go", "run", "../...", "select",
 		fmt.Sprintf("--commitFile=%s", commitFilePath),
 		fmt.Sprintf("--authorsFile=%s", authorsFilePath),
 		fmt.Sprintf("--pairsFile=%s", pairsFilePath),

@@ -1,4 +1,4 @@
-package main
+package selection
 
 import (
 	"bytes"
@@ -13,9 +13,11 @@ import (
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
-func main() {
-	log.SetFlags(log.Lshortfile)
-	options := parseOptions()
+func MakeSelection(args []string) {
+	options, err := parseOptions(args)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	cliApp := NewCLIApp(
 		func(ctx context.Context) (lib.CoAuthors, error) {

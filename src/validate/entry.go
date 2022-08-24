@@ -1,4 +1,4 @@
-package main
+package validate
 
 import (
 	"errors"
@@ -11,8 +11,6 @@ import (
 	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
-var options ValidateOptions
-
 type ValidateOptions struct {
 	CommitFilePath string
 	TrunkName      string
@@ -20,22 +18,22 @@ type ValidateOptions struct {
 	ProtectTrunk   bool
 }
 
-func init() {
-	flag.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
-	flag.StringVar(&options.TrunkName, "trunkName", "main", "name of the trunk branch")
-	flag.StringVar(&options.BranchName, "branchName", "", "name of the branch you're on")
-	flag.BoolVar(&options.ProtectTrunk, "protectTrunk", true, "whether you're allowed to commit to the trunk without pairs")
-}
+func Validate(args []string) {
+	flags := flag.NewFlagSet("validate", flag.ExitOnError)
 
-func main() {
-	flag.Parse()
-	log.SetFlags(0)
+	var options ValidateOptions
+	flags.StringVar(&options.CommitFilePath, "commitFile", ".git/COMMIT_EDITMSG", "path to commit message file")
+	flags.StringVar(&options.TrunkName, "trunkName", "main", "name of the trunk branch")
+	flags.StringVar(&options.BranchName, "branchName", "", "name of the branch you're on")
+	flags.BoolVar(&options.ProtectTrunk, "protectTrunk", true, "whether you're allowed to commit to the trunk without pairs")
 
 	handleError := func(err error) {
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
+
+	handleError(flags.Parse(args))
 
 	if options.BranchName == "" {
 		b, err := exec.Command("git", "branch", "--show-current").Output()
