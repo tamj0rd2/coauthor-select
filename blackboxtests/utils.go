@@ -2,10 +2,11 @@ package blackboxtests
 
 import (
 	"encoding/json"
-	"github.com/alecthomas/assert/v2"
-	"github.com/tamj0rd2/coauthor-select/src/lib"
 	"os"
 	"testing"
+
+	"github.com/alecthomas/assert/v2"
+	"github.com/tamj0rd2/coauthor-select/src/lib"
 )
 
 func TestMain(m *testing.M) {
@@ -17,7 +18,7 @@ func TestMain(m *testing.M) {
 
 func givenThereIsACommitMessageFile(t *testing.T, message string) {
 	t.Helper()
-	err := os.WriteFile(commitFilePath, []byte(message), 0666)
+	err := os.WriteFile(commitFilePath, []byte(message), 0o666)
 	assert.NoError(t, err)
 }
 
@@ -25,7 +26,7 @@ func givenThereIsAnAuthorsFile(t *testing.T, authors lib.CoAuthors) {
 	t.Helper()
 	bytes := []byte(authors.String())
 
-	err := os.WriteFile(authorsFilePath, bytes, 0666)
+	err := os.WriteFile(authorsFilePath, bytes, 0o666)
 	assert.NoError(t, err, "could not write authors file")
 }
 
@@ -38,7 +39,7 @@ func givenThereIsAPairsFile(t *testing.T, pairs []string) {
 	b, err := json.Marshal(pairs)
 	assert.NoError(t, err, "could not marshall pairs")
 
-	err = os.WriteFile(pairsFilePath, b, 0666)
+	err = os.WriteFile(pairsFilePath, b, 0o666)
 	assert.NoError(t, err, "could not write pairs file")
 }
 

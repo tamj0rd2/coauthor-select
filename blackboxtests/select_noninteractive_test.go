@@ -2,11 +2,12 @@ package blackboxtests
 
 import (
 	"fmt"
+	"os/exec"
+	"testing"
+
 	"github.com/acarl005/stripansi"
 	"github.com/alecthomas/assert/v2"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
-	"os/exec"
-	"testing"
 )
 
 func Test_NonInteractiveSelectHook_WhenSomeoneIs_WorkingAlone(t *testing.T) {

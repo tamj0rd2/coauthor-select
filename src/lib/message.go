@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-const COMMIT_SEPARATOR = "\n# ------------------------ >8 ------------------------"
+const CommitSeparator = "\n# ------------------------ >8 ------------------------"
 
 func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 	if len(coAuthors) == 0 {
 		return input
 	}
 
-	sections := strings.SplitN(input, COMMIT_SEPARATOR, 2)
+	sections := strings.SplitN(input, CommitSeparator, 2)
 	message := sections[0] + "\n"
 
 	for _, coAuthor := range coAuthors {
@@ -25,7 +25,7 @@ func PrepareCommitMessage(input string, coAuthors []CoAuthor) string {
 
 	if len(sections) > 1 {
 		metadataSection := sections[1]
-		message = message + COMMIT_SEPARATOR + metadataSection
+		message = message + CommitSeparator + metadataSection
 	}
 
 	return message

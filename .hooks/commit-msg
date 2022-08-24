@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+. .bingo/variables.env
+
+${COMMITLINT} lint --message $1

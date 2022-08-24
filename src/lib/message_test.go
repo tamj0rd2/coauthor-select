@@ -2,9 +2,10 @@ package lib_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/alecthomas/assert/v2"
 	"github.com/tamj0rd2/coauthor-select/src/lib"
-	"testing"
 )
 
 var (
@@ -35,10 +36,10 @@ func TestDoesNotAddCoauthorThatAlreadyExists(t *testing.T) {
 }
 
 func TestAddingCoAuthorsToTemplatedMessage(t *testing.T) {
-	inputMessage := "Hello world :D" + lib.COMMIT_SEPARATOR + "\nother stuff"
+	inputMessage := "Hello world :D" + lib.CommitSeparator + "\nother stuff"
 	coAuthors := []lib.CoAuthor{tam, john}
 
-	expectedMessage := fmt.Sprintf("Hello world :D\n\n%s\n%s%s\nother stuff", tam, john, lib.COMMIT_SEPARATOR)
+	expectedMessage := fmt.Sprintf("Hello world :D\n\n%s\n%s%s\nother stuff", tam, john, lib.CommitSeparator)
 
 	actualMessage := lib.PrepareCommitMessage(inputMessage, coAuthors)
 	assert.Equal(t, expectedMessage, actualMessage)
